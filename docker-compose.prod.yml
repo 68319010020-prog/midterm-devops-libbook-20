@@ -10,7 +10,7 @@ services:
       - db-data:/var/lib/postgresql/data
 
   backend:
-    image: ponlpon/libbook-api:latest
+    image: ${DOCKERHUB_USERNAME:-ponlpon}/libbook-api:latest
     environment:
       - PGHOST=db
       - PGUSER=postgres
@@ -23,7 +23,7 @@ services:
       - 3000:3000
 
   frontend:
-    image: ponlpon/libbook-web:latest
+    image: ${DOCKERHUB_USERNAME:-ponlpon}/libbook-web:latest
     ports:
       - 8080:80
     depends_on:

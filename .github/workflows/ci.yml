@@ -1,10 +1,11 @@
-name: CI - libbook
+name: CI/CD - libbook
 
 on:
   push:
     branches:
+      - main
       - develop
-      - 'feature/*'
+      - 'feature/**'
   pull_request:
     branches:
       - main
@@ -47,6 +48,7 @@ jobs:
 
   build_and_push:
     needs: test
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -66,7 +68,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/libbook-api:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/libbook-api:v1.0.0
+            ${{ secrets.DOCKERHUB_USERNAME }}/libbook-api:${{ github.sha }}
       - name: Build and push frontend image
         uses: docker/build-push-action@v4
         with:
@@ -74,4 +76,24 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/libbook-web:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/libbook-web:v1.0.0
+            ${{ secrets.DOCKERHUB_USERNAME }}/libbook-web:${{ github.sha }}
+
+  deploy:
+    needs: build_and_push
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.SSH_HOST != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to remote host
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            mkdir -p ~/libbook
+            cd ~/libbook
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.prod.yml -o docker-compose.prod.yml
+            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
