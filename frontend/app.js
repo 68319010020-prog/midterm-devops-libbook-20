@@ -83,7 +83,7 @@ form.addEventListener('submit', async (e) => {
   if (data.year) data.year = parseInt(data.year, 10);
 
   try {
-    if (editingId) {
+    if (editingId !== null) {
       await fetch(`${apiBase}/${editingId}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
       showMessage('อัปเดตหนังสือเรียบร้อยแล้ว');
     } else {
@@ -103,9 +103,16 @@ cancelBtn.addEventListener('click', () => {
 });
 
 document.querySelector('#books-table').addEventListener('click', async (e) => {
-  const target = e.target;
-  if (target.classList.contains('del')) {
-    const id = target.dataset.id;
+  const button = e.target.closest('button');
+  if (!button) return;
+
+  const id = Number(button.dataset.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    showMessage('ไม่พบรหัสหนังสือที่ถูกต้อง', 'error');
+    return;
+  }
+
+  if (button.classList.contains('del')) {
     try {
       await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
       showMessage('ลบข้อมูลเรียบร้อยแล้ว');
@@ -115,8 +122,7 @@ document.querySelector('#books-table').addEventListener('click', async (e) => {
     }
   }
 
-  if (target.classList.contains('edit')) {
-    const id = target.dataset.id;
+  if (button.classList.contains('edit')) {
     try {
       const res = await fetch(`${apiBase}/${id}`);
       const book = await res.json();
