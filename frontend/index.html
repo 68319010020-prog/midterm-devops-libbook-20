@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Libbook - ระบบบันทึกหนังสือ</title>
+    <style>
+      body{font-family:Arial, Helvetica, sans-serif;max-width:900px;margin:20px auto}
+      table{width:100%;border-collapse:collapse}
+      th,td{border:1px solid #ddd;padding:8px}
+      header{display:flex;justify-content:space-between;align-items:center}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Libbook - ระบบบันทึกหนังสือ</h1>
+      <div>ธเนศพล วารปรีด - 68319010020</div>
+    </header>
+
+    <section>
+      <h2>เพิ่มหนังสือ</h2>
+      <form id="book-form">
+        <input name="isbn" placeholder="ISBN" />
+        <input name="title" placeholder="Title" />
+        <input name="author" placeholder="Author" />
+        <input name="category" placeholder="Category" />
+        <input name="year" placeholder="Year" type="number" />
+        <select name="status">
+          <option value="available">พร้อมให้ยืม</option>
+          <option value="borrowed">ถูกยืม</option>
+          <option value="damaged">ชำรุด</option>
+        </select>
+        <button type="submit">บันทึก</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>รายการหนังสือ</h2>
+      <table id="books-table">
+        <thead><tr><th>ID</th><th>ISBN</th><th>Title</th><th>Author</th><th>Category</th><th>Year</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

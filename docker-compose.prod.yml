@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: libbook
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  backend:
+    image: ponlpon/libbook-api:latest
+    environment:
+      - PGHOST=db
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=libbook
+      - PGPORT=5432
+    depends_on:
+      - db
+    ports:
+      - 3000:3000
+
+  frontend:
+    image: ponlpon/libbook-web:latest
+    ports:
+      - 8080:80
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
