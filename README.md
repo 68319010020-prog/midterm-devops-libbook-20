@@ -2,7 +2,7 @@
 
 - ชื่อ: ธเนศพล วารปรีด
 - รหัสนักศึกษา: 68319010020
-- ระดับชั้น/กลุ่มเรียน: (ระบุหรือว่าง)
+- ระดับชั้น/กลุ่มเรียน: ปวส.2/2
 - รายวิชา: DevOps 30901-2008 (Midterm)
 
 Status: ![CI](https://github.com/68319010020-prog/midterm-devops-libbook-20/actions/workflows/ci.yml/badge.svg)
