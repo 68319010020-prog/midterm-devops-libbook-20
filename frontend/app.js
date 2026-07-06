@@ -34,6 +34,26 @@ function resetForm() {
   cancelBtn.style.display = 'none';
 }
 
+function validateBookData(data) {
+  if (!data.title?.trim()) {
+    showMessage('กรุณากรอกชื่อหนังสือ', 'error');
+    return false;
+  }
+  if (!data.author?.trim()) {
+    showMessage('กรุณากรอกชื่อผู้แต่ง', 'error');
+    return false;
+  }
+  if (!data.category?.trim()) {
+    showMessage('กรุณากรอกหมวดหมู่', 'error');
+    return false;
+  }
+  if (!data.status) {
+    showMessage('กรุณาเลือกสถานะหนังสือ', 'error');
+    return false;
+  }
+  return true;
+}
+
 function statusBadge(status) {
   const normalized = status || 'available';
   const label = normalized === 'available' ? 'พร้อมให้ยืม' : normalized === 'borrowed' ? 'ถูกยืม' : 'ชำรุด';
@@ -80,7 +100,11 @@ async function fetchBooks() {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(form).entries());
-  if (data.year) data.year = parseInt(data.year, 10);
+  data.year = data.year ? parseInt(data.year, 10) : null;
+
+  if (!validateBookData(data)) {
+    return;
+  }
 
   try {
     if (editingId) {

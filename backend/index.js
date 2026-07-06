@@ -42,10 +42,16 @@ app.get('/api/books/:id', async (req, res) => {
 
 app.post('/api/books', async (req, res) => {
   const { isbn, title, author, category, year, status } = req.body;
+  const parsedYear = year !== undefined && year !== '' ? parseInt(year, 10) : null;
+
+  if (!title || !author || !category || !status) {
+    return res.status(400).json({ error: 'Missing required book fields' });
+  }
+
   try {
     const result = await db.query(
       'INSERT INTO books(isbn,title,author,category,year,status) VALUES($1,$2,$3,$4,$5,$6) RETURNING *',
-      [isbn, title, author, category, year, status]
+      [isbn, title, author, category, parsedYear, status]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -56,10 +62,16 @@ app.post('/api/books', async (req, res) => {
 app.put('/api/books/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { isbn, title, author, category, year, status } = req.body;
+  const parsedYear = year !== undefined && year !== '' ? parseInt(year, 10) : null;
+
+  if (!title || !author || !category || !status) {
+    return res.status(400).json({ error: 'Missing required book fields' });
+  }
+
   try {
     const result = await db.query(
       'UPDATE books SET isbn=$1,title=$2,author=$3,category=$4,year=$5,status=$6 WHERE id=$7 RETURNING *',
-      [isbn, title, author, category, year, status, id]
+      [isbn, title, author, category, parsedYear, status, id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);
@@ -79,9 +91,23 @@ app.delete('/api/books/:id', async (req, res) => {
   }
 });
 
+async function waitForDatabase(retries = 10, delayMs = 1000) {
+  for (let attempt = 1; attempt <= retries; attempt += 1) {
+    try {
+      await db.query('SELECT 1');
+      return;
+    } catch (err) {
+      console.warn(`Database not ready (attempt ${attempt}/${retries}): ${err.message}`);
+      if (attempt === retries) throw err;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
 // initialize DB table then start
 async function init() {
   try {
+    await waitForDatabase();
     await db.query(`
       CREATE TABLE IF NOT EXISTS books (
         id SERIAL PRIMARY KEY,
